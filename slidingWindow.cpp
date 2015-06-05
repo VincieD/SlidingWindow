@@ -6,7 +6,6 @@ using namespace std;
 #include "slidingWindow.hpp"
 #include <iomanip>      // std::setw
 #include <iostream>
-//#include "stdafx.h"
 
 
 //typedef std::vector<int> int_vec_t;    // or whatever you
@@ -43,7 +42,6 @@ void SlidingWindow::matrixFillIn(std::vector<std::vector<unsigned char> >& array
 
 
 			arrayToFillIn[i].at(j) = (unsigned char)(255*rand());
-			//arrayToFillIn[i][j] = (unsigned char)(255*rand());
 		}
 	} 
 }
@@ -90,48 +88,65 @@ void SlidingWindow::matrixPrintOut(std::vector<std::vector<int> >& arrayToPrintO
 }
 
 
-//void getSlidingWindows(std::vector<std::vector<unsigned char> >& image, std::vector<std::vector<unsigned char> >& window,unsigned char regionOfIntX,unsigned char regionOfIntY)
-//{
-//	
-//   
-//   for(int i=regionOfIntX;i<winWidth + regionOfIntX;i+=1)
-//	{
-//		// windows Height shall not be greater than image rows
-//		if(i>image.size())
-//			{break;}
-//	  
-//		for(int j=regionOfIntY;j< winHeight + regionOfIntY;j+=1)    
-//		{
-//			// windows Width shall not be greater than image cols
-//			if(j>image[0].size())
-//				{break;}
-//				
-//			// index of our windows shall be inside the limits	
-//			if((indexX > winWidth) || (indexY > winHeight))
-//				{break;}		
-//			
-//			// append to the rects another vector which is called rect
-//         window[indexX].at(indexY) = (unsigned char)(image[i][j]); 
-//
-//         indexY++;
-//		}
-//		indexX++;
-//	    
-//       // clearing the index otherwise it will overflow
-//		if(indexX > winWidth - 1)
-//		{indexX = 0;}
-//		// clearing the index otherwise it will overflow
-//		if(indexY > winHeight - 1)
-//		{indexY = 0;}
-//	}
-//}
-//
+bool SlidingWindow::getSlidingWindows(std::vector<std::vector<unsigned char> >& image, std::vector<std::vector<unsigned char> >& window, std::vector<std::vector<unsigned char> >& schrinkedWindow, unsigned char regionOfIntX, unsigned char regionOfIntY)
+{
+	int indexX = 0, indexY = 0;
+	int winWidth = window.size();
+	int winHeight = window[0].size();
+	bool status = true;
+
+
+	float ratio_X = (float)(((float)(schrinkedWindow.size()) / window.size()));
+	float ratio_Y = (float)(((float)(schrinkedWindow[0].size()) / window[0].size()));
+
+	if (regionOfIntX > (image.size() - winWidth))
+	{
+		status = false;
+	}
+
+	if (regionOfIntY > (image[0].size() - winHeight))
+	{
+		status = false;
+	}
+
+	// go inside the sliding window code - and copy the data into window vector
+	if (status == true)
+	{
+		for (int i = regionOfIntX; i < ((winWidth + regionOfIntX)-1); i++ )
+		{
+			// windows Height shall not be greater than image rows
+			for (int j = regionOfIntY; j < ((winHeight + regionOfIntY)-1); j++ )
+			{
+				// append to the rects another vector which is called rect
+				//window[indexX].at(indexY) = (unsigned char)(image[i][j]);
+				schrinkedWindow[int(indexX*ratio_X)].at(int(indexY*ratio_Y)) = (unsigned char)(image[i][j]);
+				indexY++;
+			}
+			indexX++;
+			// Y index has to be clear to zero - otherwise index overflow
+			indexY = 0;
+		}
+	}
+
+   return status;
+}
+
+
+void SlidingWindow::schrinking(std::vector<std::vector<unsigned char> >& schrinkedWindow, std::vector<std::vector<unsigned char> >& originalWindow)
+{
+	static float ratio_X = (float)(originalWindow.size()) / (float)(schrinkedWindow.size());
+	static float ratio_Y = (float)(originalWindow[0].size()) / (float)(schrinkedWindow[0].size());
+	
+	for (int i=0; i < schrinkedWindow.size(); i++)
+	{
+		for (int j=0; j < schrinkedWindow[0].size(); j++)
+		{
+			schrinkedWindow[i].at(j) = originalWindow[int(i*ratio_X)][int(j*ratio_Y)];
+		}
+	}
+}
 
 ///////////////////// Private functions ///////////////////////////
-
-
-
-
 
 // initial idea is to calculate the energy of the subframe
 // add 
